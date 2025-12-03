@@ -1,18 +1,18 @@
 class Entrepreneur {
-  int? id;
-  String name;
-  String businessType;
-  String location;
-  String phone;
-
-  // NEW FIELDS
-  String? telegram;    // social media
-  String? website;     // website / online shop
-  String? imageUrl;    // profile/product image URL
-  String? description; // short bio / business description
+  final int? id;
+  final int userId;
+  final String name;
+  final String businessType;
+  final String location;
+  final String phone;
+  final String? telegram;
+  final String? website;
+  final String? imageUrl;
+  final String? description;
 
   Entrepreneur({
     this.id,
+    required this.userId,       // <-- required
     required this.name,
     required this.businessType,
     required this.location,
@@ -26,6 +26,7 @@ class Entrepreneur {
   factory Entrepreneur.fromMap(Map<String, dynamic> map) {
     return Entrepreneur(
       id: map['id'],
+      userId: map['userId'],
       name: map['name'],
       businessType: map['businessType'],
       location: map['location'],
@@ -40,6 +41,7 @@ class Entrepreneur {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'userId': userId,
       'name': name,
       'businessType': businessType,
       'location': location,

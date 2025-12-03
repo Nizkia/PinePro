@@ -2,26 +2,54 @@ import 'package:flutter/material.dart';
 import 'package:pinepro/db/database_helper.dart';
 import 'package:pinepro/models/entrepreneur.dart';
 
-class AddEntrepreneur extends StatefulWidget {
-  const AddEntrepreneur({super.key});
+class EditEntrepreneurProfileScreen extends StatefulWidget {
+  final Entrepreneur entrepreneur; // 🔹 existing data to edit
+
+  const EditEntrepreneurProfileScreen({
+    super.key,
+    required this.entrepreneur,
+  });
 
   @override
-  State<AddEntrepreneur> createState() => _AddEntrepreneurState();
+  State<EditEntrepreneurProfileScreen> createState() =>
+      _EditEntrepreneurProfileScreenState();
 }
 
-class _AddEntrepreneurState extends State<AddEntrepreneur> {
+class _EditEntrepreneurProfileScreenState
+    extends State<EditEntrepreneurProfileScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  final _nameController = TextEditingController();
-  final _businessTypeController = TextEditingController();
-  final _locationController = TextEditingController();
-  final _phoneController = TextEditingController();
+  late TextEditingController _nameController;
+  late TextEditingController _businessTypeController;
+  late TextEditingController _locationController;
+  late TextEditingController _phoneController;
+  late TextEditingController _telegramController;
+  late TextEditingController _websiteController;
+  late TextEditingController _imageUrlController;
+  late TextEditingController _descriptionController;
 
-  // NEW
-  final _telegramController = TextEditingController();
-  final _websiteController = TextEditingController();
-  final _imageUrlController = TextEditingController();
-  final _descriptionController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+
+    // 🔹 Pre-fill with existing entrepreneur data
+    _nameController =
+        TextEditingController(text: widget.entrepreneur.name);
+    _businessTypeController =
+        TextEditingController(text: widget.entrepreneur.businessType);
+    _locationController =
+        TextEditingController(text: widget.entrepreneur.location);
+    _phoneController =
+        TextEditingController(text: widget.entrepreneur.phone);
+    _telegramController =
+        TextEditingController(text: widget.entrepreneur.telegram ?? "");
+    _websiteController =
+        TextEditingController(text: widget.entrepreneur.website ?? "");
+    _imageUrlController =
+        TextEditingController(text: widget.entrepreneur.imageUrl ?? "");
+    _descriptionController =
+        TextEditingController(text: widget.entrepreneur.description ?? "");
+  }
 
   @override
   void dispose() {
@@ -39,7 +67,10 @@ class _AddEntrepreneurState extends State<AddEntrepreneur> {
   Future<void> _saveEntrepreneur() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final entrepreneur = Entrepreneur(
+    // 🔹 Create a new Entrepreneur object with updated values
+    final updatedEntrepreneur = Entrepreneur(
+      id: widget.entrepreneur.id,             // keep same PK
+      userId: widget.entrepreneur.userId,     // keep same FK
       name: _nameController.text.trim(),
       businessType: _businessTypeController.text.trim(),
       location: _locationController.text.trim(),
@@ -59,15 +90,22 @@ class _AddEntrepreneurState extends State<AddEntrepreneur> {
     );
 
     final db = await DatabaseHelper.instance.database;
-    await db.insert('entrepreneurs', entrepreneur.toMap());
 
-    Navigator.pop(context, true); // tell previous page to reload
+    await db.update(
+      'entrepreneurs',
+      updatedEntrepreneur.toMap(),
+      where: 'id = ?',
+      whereArgs: [updatedEntrepreneur.id],
+    );
+
+    // 🔹 Go back and tell previous screen “I updated”
+    Navigator.pop(context, true);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Entrepreneur')),
+      appBar: AppBar(title: const Text('Edit Profile')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -82,8 +120,9 @@ class _AddEntrepreneurState extends State<AddEntrepreneur> {
               ),
               TextFormField(
                 controller: _businessTypeController,
-                decoration:
-                const InputDecoration(labelText: 'Business Type / Product'),
+                decoration: const InputDecoration(
+                  labelText: 'Business Type / Product',
+                ),
                 validator: (value) =>
                 value == null || value.trim().isEmpty ? 'Required' : null,
               ),
@@ -95,14 +134,15 @@ class _AddEntrepreneurState extends State<AddEntrepreneur> {
               ),
               TextFormField(
                 controller: _phoneController,
-                decoration: const InputDecoration(labelText: 'Phone Number'),
+                decoration:
+                const InputDecoration(labelText: 'Phone Number'),
                 keyboardType: TextInputType.phone,
                 validator: (value) =>
                 value == null || value.trim().isEmpty ? 'Required' : null,
               ),
               const SizedBox(height: 16),
 
-              // NEW FIELDS
+              // Optional fields
               TextFormField(
                 controller: _telegramController,
                 decoration: const InputDecoration(
@@ -136,7 +176,7 @@ class _AddEntrepreneurState extends State<AddEntrepreneur> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _saveEntrepreneur,
-                  child: const Text('Save'),
+                  child: const Text('Save Changes'),
                 ),
               ),
             ],

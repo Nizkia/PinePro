@@ -3,7 +3,9 @@ import 'package:pinepro/db/database_helper.dart';
 import 'package:pinepro/models/announcement.dart';
 
 class AddAnnouncement extends StatefulWidget {
-  const AddAnnouncement({super.key});
+  final int entrepreneurId;   // 🔹 REQUIRED
+
+  const AddAnnouncement({super.key, required this.entrepreneurId});
 
   @override
   State<AddAnnouncement> createState() => _AddAnnouncementState();
@@ -19,15 +21,18 @@ class _AddAnnouncementState extends State<AddAnnouncement> {
   Future<void> saveAnnouncement() async {
     if (_formKey.currentState!.validate()) {
       final newAnnouncement = Announcement(
-        title: titleController.text,
-        message: messageController.text,
-        date: dateController.text,
+        id: null,
+        entrepreneurId: widget.entrepreneurId,      // 🔹 IMPORTANT
+        title: titleController.text.trim(),
+        message: messageController.text.trim(),
+        date: dateController.text.trim(),
       );
 
       final db = await DatabaseHelper.instance.database;
+
       await db.insert('announcements', newAnnouncement.toMap());
 
-      Navigator.pop(context, true);
+      Navigator.pop(context, true); // return success
     }
   }
 

@@ -3,7 +3,6 @@ import 'package:pinepro/db/database_helper.dart';
 import 'package:pinepro/models/user.dart';
 import '../../models/entrepreneur.dart';
 import '../home_screen.dart';
-// import '../users/userhome_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -14,6 +13,7 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
+
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -30,6 +30,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   String? errorMessage;
 
+  // VALIDATIONS (keep your version)
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) return "Enter email";
     if (!value.contains("@") || !value.contains(".")) return "Enter a valid email";
@@ -47,6 +48,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return null;
   }
 
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    businessTypeController.dispose();
+    locationController.dispose();
+    phoneController.dispose();
+    telegramController.dispose();
+    websiteController.dispose();
+    imageUrlController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
+
+  // SIGN UP
   Future<void> _signUp() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -56,25 +73,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
       name: nameController.text.trim(),
       email: emailController.text.trim(),
       password: passwordController.text,
-      role: selectedRole, // <-- save selected role
+      role: selectedRole,
     );
 
     try {
-      await db.insert('users', newUser.toMap());
+      // INSERT user & get ID
+      final userId = await db.insert('users', newUser.toMap());
 
-      // If entrepreneur, save extra entrepreneur fields
+      // If entrepreneur → save extra details
       if (selectedRole == "entrepreneur") {
-        final entrepreneur = Entrepreneur(
+        final ent = Entrepreneur(
+          userId: userId,
           name: nameController.text.trim(),
           businessType: businessTypeController.text.trim(),
           location: locationController.text.trim(),
           phone: phoneController.text.trim(),
-          telegram: telegramController.text.isEmpty ? null : telegramController.text.trim(),
-          website: websiteController.text.isEmpty ? null : websiteController.text.trim(),
-          imageUrl: imageUrlController.text.isEmpty ? null : imageUrlController.text.trim(),
-          description: descriptionController.text.isEmpty ? null : descriptionController.text.trim(),
+          telegram: telegramController.text.isEmpty
+              ? null
+              : telegramController.text.trim(),
+          website: websiteController.text.isEmpty
+              ? null
+              : websiteController.text.trim(),
+          imageUrl: imageUrlController.text.isEmpty
+              ? null
+              : imageUrlController.text.trim(),
+          description: descriptionController.text.isEmpty
+              ? null
+              : descriptionController.text.trim(),
         );
-        await db.insert('entrepreneurs', entrepreneur.toMap());
+
+        await db.insert('entrepreneurs', ent.toMap());
       }
 
       setState(() => errorMessage = null);
@@ -102,20 +130,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Name
+              // NAME
               TextFormField(
                 controller: nameController,
                 decoration: const InputDecoration(labelText: "Name"),
-                validator: (value) => value == null || value.isEmpty ? "Enter name" : null,
+                validator: (value) =>
+                value == null || value.isEmpty ? "Enter name" : null,
               ),
-              // Email
+
+              // EMAIL
               TextFormField(
                 controller: emailController,
                 decoration: const InputDecoration(labelText: "Email"),
                 keyboardType: TextInputType.emailAddress,
                 validator: _validateEmail,
               ),
-              // Password
+
+              // PASSWORD
               TextFormField(
                 controller: passwordController,
                 decoration: const InputDecoration(labelText: "Password"),
@@ -125,7 +156,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
               const SizedBox(height: 16),
 
-              // Role selection
+              // ROLE SELECTION
               DropdownButtonFormField<String>(
                 value: selectedRole,
                 items: const [
@@ -142,7 +173,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
               const SizedBox(height: 16),
 
-              // Entrepreneur extra fields
+              // EXTRA FIELDS (ONLY FOR ENTREPRENEURS)
               if (selectedRole == "entrepreneur") ...[
                 TextFormField(
                   controller: businessTypeController,

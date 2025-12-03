@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pinepro/db/database_helper.dart';
+import 'package:pinepro/models/user.dart';                // ✅ import User model
 import 'package:pinepro/screens/home_screen.dart';
-import 'package:pinepro/screens/users/userhome_screen.dart'; // import your user home page
+import 'package:pinepro/screens/users/userhome_screen.dart';
 import 'sign_up_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -45,37 +46,51 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final db = await DatabaseHelper.instance.database;
 
+    // 🔹 First: find user by email
     final result = await db.query(
       'users',
-      where: 'email = ? AND password = ?',
-      whereArgs: [
-        emailController.text.trim(),
-        passwordController.text,
-      ],
+      where: 'email = ?',
+      whereArgs: [emailController.text.trim()],
     );
 
-    if (result.isNotEmpty) {
-      setState(() => errorMessage = null);
+    if (result.isEmpty) {
+      setState(() {
+        errorMessage = "No account found with this email";
+      });
+      return;
+    }
 
-      final userMap = result.first;
-      final role = userMap['role'];
+    // 🔹 Convert DB row -> User model
+    final user = User.fromMap(result.first);
 
-      // Navigate based on role
-      if (role == 'entrepreneur') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-        );
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const UserHomeScreen()),
-        );
-      }
-    } else {
+    // 🔹 Check password
+    if (user.password != passwordController.text) {
       setState(() {
         errorMessage = "Invalid email or password";
       });
+      return;
+    }
+
+    // 🔹 Clear error message
+    setState(() => errorMessage = null);
+
+    // 🔹 Navigate based on role
+    if (user.role == 'entrepreneur') {
+      // Entrepreneur dashboard (your new HomeScreen)
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => HomeScreen(loggedInUser: user),
+        ),
+      );
+    } else {
+      // Ordinary user home (you can later also pass user if needed)
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const UserHomeScreen(),
+        ),
+      );
     }
   }
 
@@ -124,7 +139,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (_) => const SignUpScreen()),
+                      builder: (_) => const SignUpScreen(),
+                    ),
                   );
                 },
                 child: const Text("Create new account"),

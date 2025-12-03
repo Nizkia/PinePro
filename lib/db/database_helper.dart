@@ -40,26 +40,28 @@ class DatabaseHelper {
     // Entrepreneurs
     await db.execute('''
       CREATE TABLE entrepreneurs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        businessType TEXT NOT NULL,
-        location TEXT NOT NULL,
-        phone TEXT NOT NULL,
-        telegram TEXT,
-        website TEXT,
-        imageUrl TEXT,
-        description TEXT
-      )
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      businessType TEXT NOT NULL,
+      location TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      telegram TEXT,
+      website TEXT,
+      imageUrl TEXT,
+      description TEXT
+      );
     ''');
 
     // Announcements
     await db.execute('''
       CREATE TABLE announcements (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        message TEXT NOT NULL,
-        date TEXT NOT NULL
-      )
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      entrepreneurId INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      message TEXT NOT NULL,
+      date TEXT NOT NULL
+      );
     ''');
   }
 
