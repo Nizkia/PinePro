@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:pinepro/db/database_helper.dart';
+import 'package:pinepro/screens/entrepreneurs/entrepreneur_detail.dart';
 import 'package:pinepro/models/entrepreneur.dart';
 import 'add_entrepreneur.dart';
 
@@ -62,21 +63,41 @@ class _EntrepreneurListState extends State<EntrepreneurList> {
         itemBuilder: (ctx, index) {
           final e = entrepreneurs[index];
           return Card(
-            margin: const EdgeInsets.symmetric(
-                horizontal: 15, vertical: 8),
+            margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 2,
             child: ListTile(
+              leading: e.imageUrl != null && e.imageUrl!.isNotEmpty
+                  ? CircleAvatar(
+                backgroundImage: NetworkImage(e.imageUrl!),
+              )
+                  : const CircleAvatar(child: Icon(Icons.store)),
+
               title: Text(e.name),
               subtitle: Text(
-                  "${e.businessType}\n${e.location}\n📞 ${e.phone}"),
+                "${e.businessType}\n${e.location}\n📞 ${e.phone}",
+              ),
               isThreeLine: true,
+
+              // NEW: tap to see detail page
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => EntrepreneurDetail(entrepreneur: e),
+                  ),
+                );
+              },
+
               trailing: IconButton(
                 icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: () {
-                  deleteEntrepreneur(e.id!);
-                },
+                onPressed: () => deleteEntrepreneur(e.id!),
               ),
             ),
           );
+
         },
       ),
     );

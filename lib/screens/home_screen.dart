@@ -8,55 +8,34 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("PinePro"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (_) => const LoginScreen()),
-                    (route) => false,
-              );
-            },
+    return DefaultTabController(
+      length: 2, // Entrepreneurs + Announcements
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("PinePro"),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      (route) => false,
+                );
+              },
+            ),
+          ],
+          bottom: const TabBar(
+            tabs: [
+              Tab(icon: Icon(Icons.store), text: "Entrepreneurs"),
+              Tab(icon: Icon(Icons.campaign), text: "Announcements"),
+            ],
           ),
-        ],
-      ),
-
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        ),
+        body: const TabBarView(
           children: [
-
-            // ENTREPRENEURS BUTTON
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const EntrepreneurList(),
-                  ),
-                );
-              },
-              child: const Text("Entrepreneurs"),
-            ),
-
-            const SizedBox(height: 20),
-
-            // ANNOUNCEMENTS BUTTON
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const AnnouncementList(),
-                  ),
-                );
-              },
-              child: const Text("Announcements"),
-            ),
+            EntrepreneurList(),  // list of entrepreneurs
+            AnnouncementList(),  // list of announcements
           ],
         ),
       ),

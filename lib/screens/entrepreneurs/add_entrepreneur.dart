@@ -12,78 +12,133 @@ class AddEntrepreneur extends StatefulWidget {
 class _AddEntrepreneurState extends State<AddEntrepreneur> {
   final _formKey = GlobalKey<FormState>();
 
-  final nameController = TextEditingController();
-  final phoneController = TextEditingController();
-  final locationController = TextEditingController();
-  final businessTypeController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _businessTypeController = TextEditingController();
+  final _locationController = TextEditingController();
+  final _phoneController = TextEditingController();
 
-  Future<void> saveEntrepreneur() async {
-    if (_formKey.currentState!.validate()) {
-      final newEntrepreneur = Entrepreneur(
-        name: nameController.text,
-        phone: phoneController.text,
-        location: locationController.text,
-        businessType: businessTypeController.text,
-      );
+  // NEW
+  final _telegramController = TextEditingController();
+  final _websiteController = TextEditingController();
+  final _imageUrlController = TextEditingController();
+  final _descriptionController = TextEditingController();
 
-      final db = await DatabaseHelper.instance.database;
-      await db.insert('entrepreneurs', newEntrepreneur.toMap());
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _businessTypeController.dispose();
+    _locationController.dispose();
+    _phoneController.dispose();
+    _telegramController.dispose();
+    _websiteController.dispose();
+    _imageUrlController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
 
-      Navigator.pop(context, true);
-    }
+  Future<void> _saveEntrepreneur() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final entrepreneur = Entrepreneur(
+      name: _nameController.text.trim(),
+      businessType: _businessTypeController.text.trim(),
+      location: _locationController.text.trim(),
+      phone: _phoneController.text.trim(),
+      telegram: _telegramController.text.trim().isEmpty
+          ? null
+          : _telegramController.text.trim(),
+      website: _websiteController.text.trim().isEmpty
+          ? null
+          : _websiteController.text.trim(),
+      imageUrl: _imageUrlController.text.trim().isEmpty
+          ? null
+          : _imageUrlController.text.trim(),
+      description: _descriptionController.text.trim().isEmpty
+          ? null
+          : _descriptionController.text.trim(),
+    );
+
+    final db = await DatabaseHelper.instance.database;
+    await db.insert('entrepreneurs', entrepreneur.toMap());
+
+    Navigator.pop(context, true); // tell previous page to reload
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Add Entrepreneur")),
+      appBar: AppBar(title: const Text('Add Entrepreneur')),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
               TextFormField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: "Name",
-                ),
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: 'Name'),
                 validator: (value) =>
-                value!.isEmpty ? "Please enter name" : null,
+                value == null || value.trim().isEmpty ? 'Required' : null,
               ),
-
               TextFormField(
-                controller: phoneController,
-                decoration: const InputDecoration(
-                  labelText: "Phone Number",
-                ),
+                controller: _businessTypeController,
+                decoration:
+                const InputDecoration(labelText: 'Business Type / Product'),
                 validator: (value) =>
-                value!.isEmpty ? "Please enter phone number" : null,
+                value == null || value.trim().isEmpty ? 'Required' : null,
               ),
-
               TextFormField(
-                controller: locationController,
-                decoration: const InputDecoration(
-                  labelText: "Farm/Shop Location",
-                ),
+                controller: _locationController,
+                decoration: const InputDecoration(labelText: 'Location'),
                 validator: (value) =>
-                value!.isEmpty ? "Please enter location" : null,
+                value == null || value.trim().isEmpty ? 'Required' : null,
               ),
-
               TextFormField(
-                controller: businessTypeController,
-                decoration: const InputDecoration(
-                  labelText: "Business Type",
-                ),
+                controller: _phoneController,
+                decoration: const InputDecoration(labelText: 'Phone Number'),
+                keyboardType: TextInputType.phone,
                 validator: (value) =>
-                value!.isEmpty ? "Please enter business type" : null,
+                value == null || value.trim().isEmpty ? 'Required' : null,
               ),
+              const SizedBox(height: 16),
 
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: saveEntrepreneur,
-                child: const Text("Save"),
-              )
+              // NEW FIELDS
+              TextFormField(
+                controller: _telegramController,
+                decoration: const InputDecoration(
+                  labelText: 'Telegram Handle (without @)',
+                ),
+              ),
+              TextFormField(
+                controller: _websiteController,
+                decoration: const InputDecoration(
+                  labelText: 'Website / Online Store URL',
+                ),
+                keyboardType: TextInputType.url,
+              ),
+              TextFormField(
+                controller: _imageUrlController,
+                decoration: const InputDecoration(
+                  labelText: 'Image URL (optional)',
+                  hintText: 'https://example.com/image.jpg',
+                ),
+                keyboardType: TextInputType.url,
+              ),
+              TextFormField(
+                controller: _descriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Description / Short Bio',
+                ),
+                maxLines: 3,
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _saveEntrepreneur,
+                  child: const Text('Save'),
+                ),
+              ),
             ],
           ),
         ),

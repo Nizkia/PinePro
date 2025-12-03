@@ -39,13 +39,19 @@ class DatabaseHelper {
     // Entrepreneurs
     await db.execute('''
       CREATE TABLE entrepreneurs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        phone TEXT NOT NULL,
-        location TEXT NOT NULL,
-        businessType TEXT NOT NULL
-      )
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      businessType TEXT NOT NULL,
+      location TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      telegram TEXT,
+      website TEXT,
+      imageUrl TEXT,
+      description TEXT
+     )
     ''');
+
+
 
     // Announcements
     await db.execute('''
