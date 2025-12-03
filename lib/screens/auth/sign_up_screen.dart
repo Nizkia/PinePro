@@ -3,7 +3,7 @@ import 'package:pinepro/db/database_helper.dart';
 import 'package:pinepro/models/user.dart';
 import '../../models/entrepreneur.dart';
 import '../home_screen.dart';
-//import '../userhome_screen.dart';
+// import '../users/userhome_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -17,8 +17,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-
-  // Role
   String selectedRole = "user";
 
   // Entrepreneur fields
@@ -32,19 +30,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   String? errorMessage;
 
-  @override
-  void dispose() {
-    nameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    businessTypeController.dispose();
-    locationController.dispose();
-    phoneController.dispose();
-    telegramController.dispose();
-    websiteController.dispose();
-    imageUrlController.dispose();
-    descriptionController.dispose();
-    super.dispose();
+  String? _validateEmail(String? value) {
+    if (value == null || value.isEmpty) return "Enter email";
+    if (!value.contains("@") || !value.contains(".")) return "Enter a valid email";
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) return "Enter password";
+    if (value.length < 6) return "Password must be at least 6 characters";
+
+    final hasLetter = value.contains(RegExp(r'[A-Za-z]'));
+    final hasNumber = value.contains(RegExp(r'[0-9]'));
+    if (!hasLetter || !hasNumber) return "Password must contain letters and numbers";
+
+    return null;
   }
 
   Future<void> _signUp() async {
@@ -52,42 +52,33 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     final db = await DatabaseHelper.instance.database;
 
-    final user = User(
+    final newUser = User(
       name: nameController.text.trim(),
       email: emailController.text.trim(),
       password: passwordController.text,
-      role: selectedRole,
+      role: selectedRole, // <-- save selected role
     );
 
     try {
-      await db.insert('users', user.toMap());
+      await db.insert('users', newUser.toMap());
 
-      // If role is entrepreneur, insert entrepreneur details
+      // If entrepreneur, save extra entrepreneur fields
       if (selectedRole == "entrepreneur") {
         final entrepreneur = Entrepreneur(
           name: nameController.text.trim(),
           businessType: businessTypeController.text.trim(),
           location: locationController.text.trim(),
           phone: phoneController.text.trim(),
-          telegram: telegramController.text.trim().isEmpty
-              ? null
-              : telegramController.text.trim(),
-          website: websiteController.text.trim().isEmpty
-              ? null
-              : websiteController.text.trim(),
-          imageUrl: imageUrlController.text.trim().isEmpty
-              ? null
-              : imageUrlController.text.trim(),
-          description: descriptionController.text.trim().isEmpty
-              ? null
-              : descriptionController.text.trim(),
+          telegram: telegramController.text.isEmpty ? null : telegramController.text.trim(),
+          website: websiteController.text.isEmpty ? null : websiteController.text.trim(),
+          imageUrl: imageUrlController.text.isEmpty ? null : imageUrlController.text.trim(),
+          description: descriptionController.text.isEmpty ? null : descriptionController.text.trim(),
         );
-
         await db.insert('entrepreneurs', entrepreneur.toMap());
       }
 
       setState(() => errorMessage = null);
-      Navigator.pop(context); // go back to login
+      Navigator.pop(context); // back to login
     } catch (e) {
       setState(() {
         errorMessage = "Email already registered or error occurred.";
@@ -100,44 +91,46 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text("Sign Up")),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
+              const Text(
+                "Create Account",
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+
+              // Name
               TextFormField(
                 controller: nameController,
                 decoration: const InputDecoration(labelText: "Name"),
-                validator: (value) =>
-                value == null || value.isEmpty ? "Enter name" : null,
+                validator: (value) => value == null || value.isEmpty ? "Enter name" : null,
               ),
+              // Email
               TextFormField(
                 controller: emailController,
                 decoration: const InputDecoration(labelText: "Email"),
-                validator: (value) =>
-                value == null || value.isEmpty ? "Enter email" : null,
+                keyboardType: TextInputType.emailAddress,
+                validator: _validateEmail,
               ),
+              // Password
               TextFormField(
                 controller: passwordController,
                 decoration: const InputDecoration(labelText: "Password"),
                 obscureText: true,
-                validator: (value) =>
-                value == null || value.isEmpty ? "Enter password" : null,
+                validator: _validatePassword,
               ),
+
               const SizedBox(height: 16),
 
               // Role selection
               DropdownButtonFormField<String>(
                 value: selectedRole,
                 items: const [
-                  DropdownMenuItem(
-                    value: "user",
-                    child: Text("User"),
-                  ),
-                  DropdownMenuItem(
-                    value: "entrepreneur",
-                    child: Text("Entrepreneur"),
-                  ),
+                  DropdownMenuItem(value: "user", child: Text("User")),
+                  DropdownMenuItem(value: "entrepreneur", child: Text("Entrepreneur")),
                 ],
                 onChanged: (value) {
                   setState(() {
@@ -153,8 +146,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               if (selectedRole == "entrepreneur") ...[
                 TextFormField(
                   controller: businessTypeController,
-                  decoration:
-                  const InputDecoration(labelText: "Business Type"),
+                  decoration: const InputDecoration(labelText: "Business Type"),
                   validator: (value) =>
                   value == null || value.isEmpty ? "Enter business type" : null,
                 ),
@@ -172,23 +164,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 TextFormField(
                   controller: telegramController,
-                  decoration: const InputDecoration(
-                      labelText: "Telegram Handle (optional)"),
+                  decoration: const InputDecoration(labelText: "Telegram Handle (optional)"),
                 ),
                 TextFormField(
                   controller: websiteController,
-                  decoration:
-                  const InputDecoration(labelText: "Website (optional)"),
+                  decoration: const InputDecoration(labelText: "Website (optional)"),
                 ),
                 TextFormField(
                   controller: imageUrlController,
-                  decoration:
-                  const InputDecoration(labelText: "Image URL (optional)"),
+                  decoration: const InputDecoration(labelText: "Image URL (optional)"),
                 ),
                 TextFormField(
                   controller: descriptionController,
-                  decoration:
-                  const InputDecoration(labelText: "Description (optional)"),
+                  decoration: const InputDecoration(labelText: "Description (optional)"),
                   maxLines: 3,
                 ),
               ],
