@@ -19,39 +19,38 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 2,                    // 🔹 bump version
+      version: 3, // bump version to add role column
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
   }
 
   Future _createDB(Database db, int version) async {
-    // 🔹 Users table for login
+    // 🔹 Users table with role
     await db.execute('''
       CREATE TABLE users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         email TEXT NOT NULL UNIQUE,
-        password TEXT NOT NULL
+        password TEXT NOT NULL,
+        role TEXT NOT NULL
       )
     ''');
 
     // Entrepreneurs
     await db.execute('''
       CREATE TABLE entrepreneurs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      businessType TEXT NOT NULL,
-      location TEXT NOT NULL,
-      phone TEXT NOT NULL,
-      telegram TEXT,
-      website TEXT,
-      imageUrl TEXT,
-      description TEXT
-     )
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        businessType TEXT NOT NULL,
+        location TEXT NOT NULL,
+        phone TEXT NOT NULL,
+        telegram TEXT,
+        website TEXT,
+        imageUrl TEXT,
+        description TEXT
+      )
     ''');
-
-
 
     // Announcements
     await db.execute('''
@@ -65,16 +64,9 @@ class DatabaseHelper {
   }
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
-      // If DB already exists from before, add users table
-      await db.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL,
-          email TEXT NOT NULL UNIQUE,
-          password TEXT NOT NULL
-        )
-      ''');
+    if (oldVersion < 3) {
+      // add role column to users table if upgrading from old version
+      await db.execute('ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT "user"');
     }
   }
 }

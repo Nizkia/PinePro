@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pinepro/db/database_helper.dart';
 import 'package:pinepro/screens/home_screen.dart';
+import 'package:pinepro/screens/users/userhome_screen.dart'; // import your user home page
 import 'sign_up_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -40,10 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
-    // 🔴 Validation before querying DB
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     final db = await DatabaseHelper.instance.database;
 
@@ -59,10 +57,21 @@ class _LoginScreenState extends State<LoginScreen> {
     if (result.isNotEmpty) {
       setState(() => errorMessage = null);
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
+      final userMap = result.first;
+      final role = userMap['role'];
+
+      // Navigate based on role
+      if (role == 'entrepreneur') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const UserHomeScreen()),
+        );
+      }
     } else {
       setState(() {
         errorMessage = "Invalid email or password";
@@ -85,21 +94,18 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
-
               TextFormField(
                 controller: emailController,
                 decoration: const InputDecoration(labelText: "Email"),
                 keyboardType: TextInputType.emailAddress,
                 validator: _validateEmail,
               ),
-
               TextFormField(
                 controller: passwordController,
                 decoration: const InputDecoration(labelText: "Password"),
                 obscureText: true,
                 validator: _validatePassword,
               ),
-
               if (errorMessage != null) ...[
                 const SizedBox(height: 10),
                 Text(
@@ -107,13 +113,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: const TextStyle(color: Colors.red),
                 ),
               ],
-
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _login,
                 child: const Text("Login"),
               ),
-
               const SizedBox(height: 10),
               TextButton(
                 onPressed: () {

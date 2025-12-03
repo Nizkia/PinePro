@@ -3,12 +3,14 @@ class User {
   String name;
   String email;
   String password;
+  String role; // NEW FIELD: "user" or "entrepreneur"
 
   User({
     this.id,
     required this.name,
     required this.email,
     required this.password,
+    this.role = "user",
   });
 
   Map<String, dynamic> toMap() {
@@ -17,6 +19,7 @@ class User {
       'name': name,
       'email': email,
       'password': password,
+      'role': role,
     };
   }
 
@@ -26,6 +29,7 @@ class User {
       name: map['name'],
       email: map['email'],
       password: map['password'],
+      role: map['role'] ?? "user",
     );
   }
 }
