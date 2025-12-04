@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:pinepro/db/database_helper.dart';
 import 'package:pinepro/models/announcement.dart';
+import 'package:pinepro/models/user.dart';
+import '../feedback/feedback_page.dart';
 import 'add_or_edit_announcement.dart';
 
 class AnnouncementList extends StatefulWidget {
+  /// Logged-in user to control permissions
+  final User loggedInUser;
+
   /// If provided → Only show this entrepreneur’s announcements
   final int? entrepreneurId;
 
@@ -12,6 +17,7 @@ class AnnouncementList extends StatefulWidget {
 
   const AnnouncementList({
     super.key,
+    required this.loggedInUser,
     this.entrepreneurId,
     this.embedded = false,
   });
@@ -33,6 +39,7 @@ class _AnnouncementListState extends State<AnnouncementList> {
     final db = await DatabaseHelper.instance.database;
     List<Map<String, dynamic>> data;
 
+    // Show only this entrepreneur’s announcements if entrepreneurId is set
     if (widget.entrepreneurId != null) {
       data = await db.query(
         "announcements",
@@ -40,6 +47,7 @@ class _AnnouncementListState extends State<AnnouncementList> {
         whereArgs: [widget.entrepreneurId],
       );
     } else {
+      // All announcements
       data = await db.query("announcements");
     }
 
@@ -63,6 +71,8 @@ class _AnnouncementListState extends State<AnnouncementList> {
 
   @override
   Widget build(BuildContext context) {
+    final isEntrepreneur = widget.loggedInUser.role == "entrepreneur";
+
     final content = announcements.isEmpty
         ? const Center(child: Text("No announcements yet."))
         : ListView.builder(
@@ -71,15 +81,27 @@ class _AnnouncementListState extends State<AnnouncementList> {
         final a = announcements[index];
 
         return Card(
-          margin:
-          const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+          margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
           child: ListTile(
             title: Text(a.title),
             subtitle: Text("${a.message}\n📅 ${a.date}"),
             isThreeLine: true,
 
-            // EDIT + DELETE only if this list belongs to this entrepreneur
-            trailing: widget.entrepreneurId != null
+            // Navigate to FeedbackPage when tapped
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => FeedbackPage(
+                    announcementId: a.id!,
+                    loggedInUser: widget.loggedInUser,
+                  ),
+                ),
+              );
+            },
+
+            // EDIT + DELETE buttons visible only for entrepreneurs
+            trailing: isEntrepreneur
                 ? Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -100,30 +122,31 @@ class _AnnouncementListState extends State<AnnouncementList> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () {
-                    deleteAnnouncement(a.id!);
-                  },
+                  onPressed: () => deleteAnnouncement(a.id!),
                 ),
               ],
             )
-                : null, // No edit/delete in public/admin mode
+                : null,
           ),
         );
       },
     );
 
+    // If embedded inside another page → no Scaffold
     if (widget.embedded) return content;
 
-    // Full page mode (admin/customer)
     return Scaffold(
       appBar: AppBar(title: const Text("Announcements")),
-      floatingActionButton: FloatingActionButton(
+
+      // Add button visible only for entrepreneurs
+      floatingActionButton: isEntrepreneur
+          ? FloatingActionButton(
         onPressed: () async {
           final saved = await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => AddOrEditAnnouncement(
-                entrepreneurId: widget.entrepreneurId ?? 0,
+                entrepreneurId: widget.entrepreneurId!,
                 announcement: null,
               ),
             ),
@@ -131,7 +154,9 @@ class _AnnouncementListState extends State<AnnouncementList> {
           if (saved == true) loadAnnouncements();
         },
         child: const Icon(Icons.add),
-      ),
+      )
+          : null,
+
       body: content,
     );
   }

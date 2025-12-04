@@ -91,7 +91,8 @@ class _HomeScreenState extends State<HomeScreen> {
       length: 2, // Profile + My Announcements
       child: Scaffold(
         key: _scaffoldKey,
-        drawer: _buildDrawer(context), // ⭐ SIDEBAR HERE
+        drawer: _buildDrawer(context),
+        // ⭐ SIDEBAR HERE
 
         appBar: AppBar(
           title: const Text("PinePro – Entrepreneur"),
@@ -183,9 +184,10 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const EntrepreneurList(),
+                  builder: (_) => EntrepreneurList(loggedInUser: widget.loggedInUser),
                 ),
               );
+
             },
           ),
 
@@ -267,6 +269,7 @@ class _HomeScreenState extends State<HomeScreen> {
   /// 📢 Announcements Tab
   Widget _buildAnnouncementsTab() {
     return AnnouncementList(
+      loggedInUser: widget.loggedInUser,
       entrepreneurId: entrepreneur!.id!,
       embedded: true,
     );

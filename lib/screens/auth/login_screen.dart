@@ -46,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final db = await DatabaseHelper.instance.database;
 
-    // 🔹 First: find user by email
+    // 🔹 Find user by email
     final result = await db.query(
       'users',
       where: 'email = ?',
@@ -76,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // 🔹 Navigate based on role
     if (user.role == 'entrepreneur') {
-      // Entrepreneur dashboard (your new HomeScreen)
+      // Entrepreneur dashboard
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -84,15 +84,16 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
     } else {
-      // Ordinary user home (you can later also pass user if needed)
+      // Ordinary user home – now pass loggedInUser
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => const UserHomeScreen(),
+          builder: (_) => UserHomeScreen(loggedInUser: user),
         ),
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

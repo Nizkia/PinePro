@@ -63,6 +63,14 @@ class DatabaseHelper {
       date TEXT NOT NULL
       );
     ''');
+    await db.execute('''CREATE TABLE feedback (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        announcementId INTEGER NOT NULL,
+        userId INTEGER NOT NULL,
+        comment TEXT NOT NULL,
+        date TEXT NOT NULL
+    )
+    ''');
   }
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
