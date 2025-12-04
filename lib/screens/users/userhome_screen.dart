@@ -78,7 +78,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               child: Icon(Icons.person),
             ),
           ),
-
           ListTile(
             leading: const Icon(Icons.store),
             title: const Text("Entrepreneurs List"),
@@ -87,7 +86,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               DefaultTabController.of(context)?.animateTo(0);
             },
           ),
-
           ListTile(
             leading: const Icon(Icons.campaign),
             title: const Text("Announcements"),
@@ -96,12 +94,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               DefaultTabController.of(context)?.animateTo(1);
             },
           ),
-
           const Divider(),
-
           ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text("Logout", style: TextStyle(color: Colors.red)),
+            leading: const Icon(Icons.logout),
+            title: const Text("Logout"),
             onTap: _logout,
           ),
         ],

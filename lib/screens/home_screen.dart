@@ -5,8 +5,11 @@ import 'package:pinepro/models/user.dart';
 import 'package:pinepro/models/entrepreneur.dart';
 import 'package:pinepro/screens/entrepreneurs/entrepreneur_list.dart';
 import 'package:pinepro/screens/entrepreneurs/edit_entrepreneur_profile.dart';
+import 'announcements/all_announcements.dart';
 import 'announcements/announcement_list.dart';
 import 'announcements/add_announcement.dart';
+import 'entrepreneurs/entrepreneur_list_page.dart';
+import 'entrepreneurs/registered_entrepreneurs_page.dart';
 
 class HomeScreen extends StatefulWidget {
   final User loggedInUser;
@@ -169,27 +172,38 @@ class _HomeScreenState extends State<HomeScreen> {
 
           ListTile(
             leading: const Icon(Icons.campaign),
-            title: const Text("My Announcements"),
-            onTap: () {
-              Navigator.pop(context);
-              DefaultTabController.of(context).animateTo(1);
-            },
-          ),
-
-          ListTile(
-            leading: const Icon(Icons.store),
-            title: const Text("Entrepreneurs List"),
+            title: const Text("All Announcements"),
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => EntrepreneurList(loggedInUser: widget.loggedInUser),
+                  builder: (_) => AllAnnouncementsPage(
+                    loggedInUser: widget.loggedInUser,
+                  ),
                 ),
               );
-
             },
           ),
+
+
+          ListTile(
+            leading: const Icon(Icons.store),
+            title: const Text("Registered Entrepreneurs"),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => RegisteredEntrepreneursPage(
+                    loggedInUser: widget.loggedInUser,
+                  ),
+                ),
+              );
+            },
+          ),
+
+
 
           const Divider(),
 
