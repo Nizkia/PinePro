@@ -26,26 +26,33 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return DefaultTabController(
-      length: 2,
+      length: 2, // Entrepreneurs + Announcements
       child: Scaffold(
         key: _scaffoldKey,
 
+        // ------------------ AppBar ------------------
         appBar: AppBar(
+          backgroundColor: theme.primaryColor,
+          foregroundColor: Colors.white,
           title: Text("PinePro – ${widget.loggedInUser.name}"),
-
           leading: IconButton(
             icon: const Icon(Icons.menu),
             onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
-
-          bottom: const TabBar(
-            tabs: [
+          bottom: TabBar(
+            indicatorColor: Colors.white,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white70,
+            labelStyle: const TextStyle(fontWeight: FontWeight.w600),
+            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400),
+            tabs: const [
               Tab(icon: Icon(Icons.store), text: "Entrepreneurs"),
               Tab(icon: Icon(Icons.campaign), text: "Announcements"),
             ],
           ),
-
           actions: [
             IconButton(
               icon: const Icon(Icons.logout),
@@ -54,53 +61,58 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           ],
         ),
 
-        drawer: _buildDrawer(),
+        // ------------------ Drawer ------------------
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              UserAccountsDrawerHeader(
+                decoration: BoxDecoration(color: theme.primaryColor),
+                accountName: Text(
+                  widget.loggedInUser.name,
+                  style: const TextStyle(color: Colors.white),
+                ),
+                accountEmail: Text(
+                  widget.loggedInUser.email,
+                  style: const TextStyle(color: Colors.white70),
+                ),
+                currentAccountPicture: const CircleAvatar(
+                  child: Icon(Icons.person),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.store),
+                title: const Text("Entrepreneurs List"),
+                onTap: () {
+                  Navigator.pop(context);
+                  DefaultTabController.of(context)?.animateTo(0);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.campaign),
+                title: const Text("Announcements"),
+                onTap: () {
+                  Navigator.pop(context);
+                  DefaultTabController.of(context)?.animateTo(1);
+                },
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.logout),
+                title: const Text("Logout"),
+                onTap: _logout,
+              ),
+            ],
+          ),
+        ),
 
+        // ------------------ Body ------------------
         body: TabBarView(
           children: [
             EntrepreneurList(loggedInUser: widget.loggedInUser),
             AnnouncementList(loggedInUser: widget.loggedInUser),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildDrawer() {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          UserAccountsDrawerHeader(
-            accountName: Text(widget.loggedInUser.name),
-            accountEmail: Text(widget.loggedInUser.email),
-            currentAccountPicture: const CircleAvatar(
-              child: Icon(Icons.person),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.store),
-            title: const Text("Entrepreneurs List"),
-            onTap: () {
-              Navigator.pop(context);
-              DefaultTabController.of(context)?.animateTo(0);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.campaign),
-            title: const Text("Announcements"),
-            onTap: () {
-              Navigator.pop(context);
-              DefaultTabController.of(context)?.animateTo(1);
-            },
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text("Logout"),
-            onTap: _logout,
-          ),
-        ],
       ),
     );
   }

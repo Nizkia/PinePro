@@ -5,16 +5,12 @@ import 'app_spacing.dart';
 ThemeData buildAppTheme() {
   return ThemeData(
     fontFamily: 'Poppins',
-
     scaffoldBackgroundColor: AppColors.background,
+    primaryColor: AppColors.primary,
+    hintColor: AppColors.accent,
+    cardColor: AppColors.surface,
 
-    colorScheme: ColorScheme.light(
-      primary: AppColors.primary,
-      secondary: AppColors.accent,
-      surface: AppColors.surface,
-    ),
-
-    appBarTheme: const AppBarTheme(
+    appBarTheme: AppBarTheme(
       backgroundColor: AppColors.primary,
       foregroundColor: Colors.white,
       elevation: 0,
@@ -27,10 +23,13 @@ ThemeData buildAppTheme() {
       ),
     ),
 
-    tabBarTheme: const TabBarTheme(
+    // Use TabBarThemeData instead of TabBarTheme
+    tabBarTheme: TabBarThemeData(
       labelColor: Colors.white,
       unselectedLabelColor: Colors.white70,
-      indicatorColor: Colors.white,
+      indicator: UnderlineTabIndicator(
+        borderSide: BorderSide(color: Colors.white, width: 2),
+      ),
       labelStyle: TextStyle(
         fontSize: 15,
         fontWeight: FontWeight.w600,
@@ -41,9 +40,10 @@ ThemeData buildAppTheme() {
       ),
     ),
 
-    cardTheme: CardTheme(
+    // Use CardThemeData instead of CardTheme
+    cardTheme: CardThemeData(
       elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       shadowColor: Colors.black12,
       color: AppColors.surface,
       shape: RoundedRectangleBorder(
@@ -54,34 +54,30 @@ ThemeData buildAppTheme() {
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: AppColors.surface,
-
-      contentPadding: const EdgeInsets.symmetric(
+      contentPadding: EdgeInsets.symmetric(
         vertical: AppSpacing.md,
         horizontal: AppSpacing.md,
       ),
-
-      labelStyle: const TextStyle(
+      labelStyle: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w500,
         color: AppColors.textSecondary,
       ),
-
       enabledBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: AppColors.border),
+        borderSide: BorderSide(color: AppColors.border),
         borderRadius: BorderRadius.circular(12),
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: AppColors.primary, width: 2),
+        borderSide: BorderSide(color: AppColors.primary, width: 2),
         borderRadius: BorderRadius.circular(12),
       ),
     ),
-
 
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 20),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -89,7 +85,7 @@ ThemeData buildAppTheme() {
       ),
     ),
 
-    iconTheme: const IconThemeData(
+    iconTheme: IconThemeData(
       color: AppColors.primaryDark,
       size: 26,
     ),

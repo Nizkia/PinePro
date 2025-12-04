@@ -8,7 +8,6 @@ import 'package:pinepro/screens/entrepreneurs/edit_entrepreneur_profile.dart';
 import 'announcements/all_announcements.dart';
 import 'announcements/announcement_list.dart';
 import 'announcements/add_announcement.dart';
-import 'entrepreneurs/entrepreneur_list_page.dart';
 import 'entrepreneurs/registered_entrepreneurs_page.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -26,7 +25,6 @@ class _HomeScreenState extends State<HomeScreen> {
   String? loadError;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final TabController? _tabController = null;
 
   @override
   void initState() {
@@ -70,6 +68,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     if (isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -80,6 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return Scaffold(
         appBar: AppBar(
           title: const Text("PinePro – Entrepreneur"),
+          backgroundColor: theme.primaryColor,
         ),
         body: Center(
           child: Text(
@@ -91,20 +92,26 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return DefaultTabController(
-      length: 2, // Profile + My Announcements
+      length: 2,
       child: Scaffold(
         key: _scaffoldKey,
-        drawer: _buildDrawer(context),
-        // ⭐ SIDEBAR HERE
 
+        // ------------------ AppBar ------------------
         appBar: AppBar(
+          backgroundColor: theme.primaryColor,
+          foregroundColor: Colors.white,
           title: const Text("PinePro – Entrepreneur"),
           leading: IconButton(
             icon: const Icon(Icons.menu),
             onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
-          bottom: const TabBar(
-            tabs: [
+          bottom: TabBar(
+            indicatorColor: Colors.white,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white70,
+            labelStyle: const TextStyle(fontWeight: FontWeight.w600),
+            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400),
+            tabs: const [
               Tab(icon: Icon(Icons.person), text: "Profile"),
               Tab(icon: Icon(Icons.campaign), text: "My Announcements"),
             ],
@@ -117,6 +124,92 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
 
+        // ------------------ Drawer ------------------
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              UserAccountsDrawerHeader(
+                decoration: BoxDecoration(color: theme.primaryColor),
+                accountName: Text(
+                  entrepreneur!.name,
+                  style: const TextStyle(color: Colors.white),
+                ),
+                accountEmail: Text(
+                  widget.loggedInUser.email,
+                  style: const TextStyle(color: Colors.white70),
+                ),
+                currentAccountPicture: const CircleAvatar(
+                  child: Icon(Icons.person),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.person),
+                title: const Text("Profile"),
+                onTap: () {
+                  Navigator.pop(context);
+                  DefaultTabController.of(context).animateTo(0);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.campaign),
+                title: const Text("All Announcements"),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => AllAnnouncementsPage(
+                        loggedInUser: widget.loggedInUser,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.store),
+                title: const Text("Registered Entrepreneurs"),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => RegisteredEntrepreneursPage(
+                        loggedInUser: widget.loggedInUser,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text("Edit Profile"),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => EditEntrepreneurProfileScreen(
+                        entrepreneur: entrepreneur!,
+                      ),
+                    ),
+                  ).then((updated) {
+                    if (updated == true) _loadEntrepreneurData();
+                  });
+                },
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.logout),
+                title: const Text("Logout"),
+                onTap: () => _logout(context),
+              ),
+            ],
+          ),
+        ),
+
+        // ------------------ Body ------------------
         body: TabBarView(
           children: [
             _buildProfileTab(),
@@ -130,111 +223,16 @@ class _HomeScreenState extends State<HomeScreen> {
               context,
               MaterialPageRoute(
                 builder: (_) => AddAnnouncement(
-                  entrepreneurId: entrepreneur!.id!,  // 🔹 pass entrepreneurId
+                  entrepreneurId: entrepreneur!.id!,
                 ),
               ),
             );
 
-            // 🔹 If new announcement saved, refresh announcements tab
-            if (result == true) {
-              setState(() {}); // simplest reload of AnnouncementList
-            }
+            if (result == true) setState(() {});
           },
           child: const Icon(Icons.add),
+          backgroundColor: theme.primaryColor,
         ),
-
-      ),
-    );
-  }
-
-  /// ⭐  SIDEBAR / DRAWER IMPLEMENTATION
-  Widget _buildDrawer(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          UserAccountsDrawerHeader(
-            accountName: Text(entrepreneur!.name),
-            accountEmail: Text(widget.loggedInUser.email),
-            currentAccountPicture: const CircleAvatar(
-              child: Icon(Icons.person),
-            ),
-          ),
-
-          ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text("Profile"),
-            onTap: () {
-              Navigator.pop(context); // close drawer
-              DefaultTabController.of(context).animateTo(0);
-            },
-          ),
-
-          ListTile(
-            leading: const Icon(Icons.campaign),
-            title: const Text("All Announcements"),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => AllAnnouncementsPage(
-                    loggedInUser: widget.loggedInUser,
-                  ),
-                ),
-              );
-            },
-          ),
-
-
-          ListTile(
-            leading: const Icon(Icons.store),
-            title: const Text("Registered Entrepreneurs"),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => RegisteredEntrepreneursPage(
-                    loggedInUser: widget.loggedInUser,
-                  ),
-                ),
-              );
-            },
-          ),
-
-
-
-          const Divider(),
-
-          ListTile(
-            leading: const Icon(Icons.edit),
-            title: const Text("Edit Profile"),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => EditEntrepreneurProfileScreen(
-                    entrepreneur: entrepreneur!,
-                  ),
-                ),
-              ).then((updated) {
-                if (updated == true) {
-                  _loadEntrepreneurData();
-                }
-              });
-            },
-          ),
-
-          const Divider(),
-
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text("Logout"),
-            onTap: () => _logout(context),
-          ),
-        ],
       ),
     );
   }
