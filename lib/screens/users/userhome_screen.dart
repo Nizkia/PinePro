@@ -27,21 +27,25 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2, // Entrepreneurs + Announcements
+      length: 2,
       child: Scaffold(
         key: _scaffoldKey,
+
         appBar: AppBar(
           title: Text("PinePro – ${widget.loggedInUser.name}"),
+
           leading: IconButton(
             icon: const Icon(Icons.menu),
             onPressed: () => _scaffoldKey.currentState?.openDrawer(),
           ),
+
           bottom: const TabBar(
             tabs: [
               Tab(icon: Icon(Icons.store), text: "Entrepreneurs"),
               Tab(icon: Icon(Icons.campaign), text: "Announcements"),
             ],
           ),
+
           actions: [
             IconButton(
               icon: const Icon(Icons.logout),
@@ -49,12 +53,12 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
             ),
           ],
         ),
+
         drawer: _buildDrawer(),
+
         body: TabBarView(
           children: [
-            // All entrepreneurs are visible to users
             EntrepreneurList(loggedInUser: widget.loggedInUser),
-            // All announcements visible to users
             AnnouncementList(loggedInUser: widget.loggedInUser),
           ],
         ),
@@ -74,6 +78,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               child: Icon(Icons.person),
             ),
           ),
+
           ListTile(
             leading: const Icon(Icons.store),
             title: const Text("Entrepreneurs List"),
@@ -82,6 +87,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               DefaultTabController.of(context)?.animateTo(0);
             },
           ),
+
           ListTile(
             leading: const Icon(Icons.campaign),
             title: const Text("Announcements"),
@@ -90,10 +96,12 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               DefaultTabController.of(context)?.animateTo(1);
             },
           ),
+
           const Divider(),
+
           ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text("Logout"),
+            leading: const Icon(Icons.logout, color: Colors.red),
+            title: const Text("Logout", style: TextStyle(color: Colors.red)),
             onTap: _logout,
           ),
         ],

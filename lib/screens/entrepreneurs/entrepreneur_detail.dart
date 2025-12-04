@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:pinepro/models/entrepreneur.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class EntrepreneurDetail extends StatelessWidget {
   final Entrepreneur entrepreneur;
@@ -60,15 +61,33 @@ class EntrepreneurDetail extends StatelessWidget {
                 entrepreneur.telegram!.isNotEmpty)
               ListTile(
                 leading: const Icon(Icons.telegram),
-                title: Text("@${entrepreneur.telegram}"),
+                title: Text(
+                  "@${entrepreneur.telegram}",
+                  style: const TextStyle(
+                    color: Colors.blue,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
                 onTap: () async {
-                  final url =
-                  Uri.parse("https://t.me/${entrepreneur.telegram}");
+                  final username = entrepreneur.telegram!.trim();
+
+                  // final URL to open
+                  final url = Uri.parse("https://t.me/$username");
+                  print("Launching: https://t.me/$username");
                   if (await canLaunchUrl(url)) {
-                    await launchUrl(url);
+                    await launchUrl(
+                      url,
+                      mode: LaunchMode.externalApplication,
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Could not open Telegram link")),
+                    );
                   }
                 },
               ),
+
+
 
             if (entrepreneur.website != null &&
                 entrepreneur.website!.isNotEmpty)
